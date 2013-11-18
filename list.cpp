@@ -1,11 +1,11 @@
-#include "list.hpp"
 #include <iostream>
+#include "list.hpp"
 
-Node::~Node() {}
+
 
 std::ostream &operator<<(std::ostream &os, Node &node) {
   auto next = node.get_next();
-  os << '(' << *(node.get_data());
+  os << '(' << node.get_data());
   if (next) {
     return os << " . " << *next << ')';
   } else {
@@ -33,9 +33,39 @@ std::ostream &operator<<(std::ostream &os, Node &node) {
 
 // void Node::free_shallow(Node& list) {}
 
+void List::cons(std::shared_ptr<Node> head, std::shared_ptr<Node> tail) {
+  head->next = tail;
+}
+
+std::shared_ptr<List> List::cons(std::shared_ptr<Node> head, std::shared_ptr<List>tail){
+  head->next = tail->head;
+  tail->head = head;
+  return tail;
+}
+
+std::shared_ptr<Node> List::reverse(std::shared_ptr<Node> ptr){
+  std::shared_ptr<Node> temp;
+  std::shared_ptr<Node> previous = nullptr;
+  while(ptr != nullptr) {
+    temp = ptr->next;
+    ptr->next = previous;
+    previous = ptr;
+    ptr = temp;
+  }
+  return previous;
+}
+
+std::shared_ptr<List> List::reverse(std::shared_ptr<List> list) {
+  list->head = List::reverse(list->head);  
+  return list;
+}
+
 int main(int argc, char *argv[], char *env[]) {
-  Node n((std::shared_ptr<variant>(new variant(std::string("123")))));
-  Node n2((std::shared_ptr<variant>(new variant(std::string("456")))), &n);
+  Node n( std::make_shared<variant>(std::string("123")) );
+  Node n2( std::make_shared<variant>(std::string("456")), &n);
   std::cout << n2;
   return 0;
 }
+
+
+

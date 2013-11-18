@@ -1,7 +1,7 @@
 /*
  * esh, the Unix shell with Lisp-like syntax.
- * Copyright (C) 1999  Ivan Tkatchev
- * This source code is under the GPL.
+ * Copyright (C) 2013 Katherine Whitlock
+ * This source code is under the BSD (3 clause) license.
  */
 
 /*
@@ -40,60 +40,61 @@
 
 class List;
 
-typedef boost::variant<std::string, bool> variant;
+typedef boost::variant<std::string, char *, bool> variant;
 
-typedef struct Node {
+class Node {
+  friend class List;
   std::shared_ptr<variant> data;
-  Node *next;
+  std::shared_ptr<Node> next;
   char type;
   char flag;
 
+ public:
   // Various constructors
   // Node(shared_ptr<void> data, char type, char flag)
   //     : data(data), next(NULL), type(type), flag(flag) {};
   // Node(void *data, char type)
   //     : data(data), next(NULL), type(type), flag(FLAG_NONE) {};
+  Node(variant* data, Node *tail)
+      : data(std::shared_ptr<variant>(data)), next(std::shared_ptr<Node>(tail)), type(TYPE_STRING), flag(FLAG_NONE) {}
+  Node(variant * data)
+      : data(std::shared_ptr<variant>(data)), next(nullptr), type(TYPE_STRING), flag(FLAG_NONE) {}
+  Node(variant* data, std::shared_ptr<Node> tail)
+      : data(std::shared_ptr<variant>(data)), next(tail), type(TYPE_STRING), flag(FLAG_NONE) {}
   Node(std::shared_ptr<variant> data, Node *tail)
-      : data(data), next(tail), type(TYPE_STRING), flag(FLAG_NONE) {};
+      : data(data), next(std::shared_ptr<Node>(tail)), type(TYPE_STRING), flag(FLAG_NONE) {}
   Node(std::shared_ptr<variant> data)
-      : data(data), next(NULL), type(TYPE_STRING), flag(FLAG_NONE) {};
+      : data(data), next(nullptr), type(TYPE_STRING), flag(FLAG_NONE) {}
+  Node(std::shared_ptr<variant> data, std::shared_ptr<Node> tail)
+      : data(data), next(tail), type(TYPE_STRING), flag(FLAG_NONE) {}
+
   // Node(const Node &other);
 
-  ~Node();
-
-
-
   // Getters and setters
-  inline Node *get_next() {
-    return this->next;
-  };
-  inline std::shared_ptr<variant> get_data() {
-    return this->data;
-  };
-  inline void set_type(char type) {
-    this->type = type;
-  };
-  inline char get_type() {
-    return this->type;
-  };
-  inline void set_flag(char flag) {
-    this->flag = flag;
-  };
-  inline char get_flag() {
-    return this->flag;
-  };
-} Node;
-
-class List {
-  Node* head;
-  public: 
-    static Node *reverse(Node *list);
-
-protected:
+  inline std::shared_ptr<Node> get_next() { return this->next; }
+  inline std::shared_ptr<variant> get_data() { return this->data; }
+  inline void set_type(char type) { this->type = type; }
+  inline char get_type() { return this->type; }
+  inline void set_flag(char flag) { this->flag = flag; }
+  inline char get_flag() { return this->flag; }
 };
 
+class List {
+  std::shared_ptr<Node> head;
+ public:
+  // Static functions
+  static void cons(std::shared_ptr<Node> head, std::shared_ptr<Node> tail);
+  static std::shared_ptr<List> cons(std::shared_ptr<Node> head, std::shared_ptr<List> tail);
+  static std::shared_ptr<Node> reverse(std::shared_ptr<Node> head);
+  static std::shared_ptr<List> reverse(std::shared_ptr<List> list);
 
-std::ostream &operator << (std::ostream &os, Node &node);
+  // Constructors
+  List(std::shared_ptr<Node> head)
+      : head(head) {};
+  List(Node *head)
+      : head(std::shared_ptr<Node>(head)) {};
+};
 
+std::ostream &operator<<(std::ostream &os, Node &node);
 
-#endif // LIST_HPP
+#endif  // LIST_HPP
