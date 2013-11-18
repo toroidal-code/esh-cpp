@@ -1,7 +1,7 @@
 #include <iostream>
 #include "list.hpp"
 
-std::ostream &operator<<(std::ostream &os, Node &node) {
+std::ostream &operator<<(std::ostream &os, const Node &node) {
   auto next = node.get_next();
   os << '(' << *(node.get_data());
   if (next) {
@@ -11,7 +11,7 @@ std::ostream &operator<<(std::ostream &os, Node &node) {
   }
 }
 
-std::ostream &operator<<(std::ostream &os, List &list) {
+std::ostream &operator<<(std::ostream &os, const List &list) {
   return os << *(list.get_head());
 }
 
@@ -44,6 +44,8 @@ std::shared_ptr<Node> List::reverse(std::shared_ptr<Node> ptr) {
   }
   return previous;
 }
+
+void List::reverse() { this->head = List::reverse(this->head); }
 
 int main(int argc, char *argv[], char *env[]) {
   auto s = std::make_shared<variant>(std::string("123"));

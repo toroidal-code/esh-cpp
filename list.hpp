@@ -31,7 +31,7 @@
 
 class List;
 
-typedef boost::variant<std::string, char *, bool> variant;
+typedef boost::variant<std::string, List, char *, bool> variant;
 
 class Node {
   friend class List;
@@ -74,12 +74,12 @@ class Node {
   // Node(const Node &other);
 
   // Getters and setters
-  inline std::shared_ptr<Node> get_next() { return this->next; }
-  inline std::shared_ptr<variant> get_data() { return this->data; }
-  inline void set_type(char type) { this->type = type; }
-  inline char get_type() { return this->type; }
-  inline void set_flag(char flag) { this->flag = flag; }
-  inline char get_flag() { return this->flag; }
+  inline std::shared_ptr<Node> get_next() const { return this->next; }
+  inline std::shared_ptr<variant> get_data() const { return this->data; }
+  inline void set_type(const char type) { this->type = type; }
+  inline char get_type() const { return this->type; }
+  inline void set_flag(const char flag) { this->flag = flag; }
+  inline char get_flag() const { return this->flag; }
 };
 
 class List {
@@ -91,16 +91,16 @@ class List {
   static void cons(std::shared_ptr<Node> head, std::shared_ptr<Node> tail);
   static std::shared_ptr<List> cons(std::shared_ptr<Node> head,
                                     std::shared_ptr<List> tail);
-  void reverse() { this->head = List::reverse(this->head); }
+  void reverse();
 
-  std::shared_ptr<Node> get_head() { return this->head; }
+  inline std::shared_ptr<Node> get_head() { return this->head; }
+  inline std::shared_ptr<Node> get_head() const { return this->head; }
 
   // Constructors
   List(std::shared_ptr<Node> head) : head(head) {};
   List(Node *head) : head(std::shared_ptr<Node>(head)) {};
 };
 
-std::ostream &operator<<(std::ostream &os, Node &node);
-std::ostream &operator<<(std::ostream &os, List &list);
-
+std::ostream &operator<<(std::ostream &os, const Node &node);
+std::ostream &operator<<(std::ostream &os, const List &list);
 #endif  // LIST_HPP
