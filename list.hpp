@@ -5,21 +5,12 @@
  */
 
 /*
- * A very simple linked-list implementation.
+ * A simple linked-list implementation.
  *
  * Pitfalls:
  *
  *  + You cannot delete elements from the list.
- *  + The list functions are lisp-like, i.e. "ls_cons" returns a list.
  *  + Please don't use the internals of the "list" structure.
- *  + You can accidentaly reverse the arguments to "ls_cons"
- *    and not get a warning from the compiler!
- *  + The list does not do any memory management. Nothing is copied before
- *    insertion, and "ls_free" does not free the data in the list.
- *    "ls_free_all" is provided as a convinience -- it will free
- *    the data before deleting the list node.
- *  + "ls_copy" and "ls_free_all" make lots of assumptions about type
- *     information.
  */
 
 #ifndef LIST_HPP
@@ -55,14 +46,26 @@ class Node {
   //     : data(data), next(NULL), type(type), flag(flag) {};
   // Node(void *data, char type)
   //     : data(data), next(NULL), type(type), flag(FLAG_NONE) {};
-  Node(variant* data, Node *tail)
-      : data(std::shared_ptr<variant>(data)), next(std::shared_ptr<Node>(tail)), type(TYPE_STRING), flag(FLAG_NONE) {}
-  Node(variant * data)
-      : data(std::shared_ptr<variant>(data)), next(nullptr), type(TYPE_STRING), flag(FLAG_NONE) {}
-  Node(variant* data, std::shared_ptr<Node> tail)
-      : data(std::shared_ptr<variant>(data)), next(tail), type(TYPE_STRING), flag(FLAG_NONE) {}
+  Node(variant *data, Node *tail)
+      : data(std::shared_ptr<variant>(data)),
+        next(std::shared_ptr<Node>(tail)),
+        type(TYPE_STRING),
+        flag(FLAG_NONE) {}
+  Node(variant *data)
+      : data(std::shared_ptr<variant>(data)),
+        next(nullptr),
+        type(TYPE_STRING),
+        flag(FLAG_NONE) {}
+  Node(variant *data, std::shared_ptr<Node> tail)
+      : data(std::shared_ptr<variant>(data)),
+        next(tail),
+        type(TYPE_STRING),
+        flag(FLAG_NONE) {}
   Node(std::shared_ptr<variant> data, Node *tail)
-      : data(data), next(std::shared_ptr<Node>(tail)), type(TYPE_STRING), flag(FLAG_NONE) {}
+      : data(data),
+        next(std::shared_ptr<Node>(tail)),
+        type(TYPE_STRING),
+        flag(FLAG_NONE) {}
   Node(std::shared_ptr<variant> data)
       : data(data), next(nullptr), type(TYPE_STRING), flag(FLAG_NONE) {}
   Node(std::shared_ptr<variant> data, std::shared_ptr<Node> tail)
@@ -81,20 +84,23 @@ class Node {
 
 class List {
   std::shared_ptr<Node> head;
+  static std::shared_ptr<Node> reverse(std::shared_ptr<Node> head);
+
  public:
   // Static functions
   static void cons(std::shared_ptr<Node> head, std::shared_ptr<Node> tail);
-  static std::shared_ptr<List> cons(std::shared_ptr<Node> head, std::shared_ptr<List> tail);
-  static std::shared_ptr<Node> reverse(std::shared_ptr<Node> head);
-  static std::shared_ptr<List> reverse(std::shared_ptr<List> list);
+  static std::shared_ptr<List> cons(std::shared_ptr<Node> head,
+                                    std::shared_ptr<List> tail);
+  void reverse() { this->head = List::reverse(this->head); }
+
+  std::shared_ptr<Node> get_head() { return this->head; }
 
   // Constructors
-  List(std::shared_ptr<Node> head)
-      : head(head) {};
-  List(Node *head)
-      : head(std::shared_ptr<Node>(head)) {};
+  List(std::shared_ptr<Node> head) : head(head) {};
+  List(Node *head) : head(std::shared_ptr<Node>(head)) {};
 };
 
 std::ostream &operator<<(std::ostream &os, Node &node);
+std::ostream &operator<<(std::ostream &os, List &list);
 
 #endif  // LIST_HPP
