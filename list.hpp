@@ -18,6 +18,8 @@
 #include <string>
 #include <memory>
 #include <boost/variant.hpp>
+#include <boost/variant/get.hpp>
+#include <boost/any.hpp>
 
 #define TYPE_STRING 0
 #define TYPE_LIST 1
@@ -30,52 +32,44 @@
 #define FLAG_NONE 0
 
 class List;
+class Cell;
+typedef boost::variant<std::string, bool, int,
+    boost::recursive_wrapper<Cell>, boost::recursive_wrapper<List>> variant;
+//typedef boost::any variant;
 
-typedef boost::variant<std::string, List, char *, bool> variant;
-
-class Node {
+class Cell {
   friend class List;
-  std::shared_ptr<variant> data;
-  std::shared_ptr<Node> next;
+  std::shared_ptr<variant> car;
+  std::shared_ptr<variant> cdr;
   char type;
   char flag;
 
  public:
   // Various constructors
-  // Node(shared_ptr<void> data, char type, char flag)
-  //     : data(data), next(NULL), type(type), flag(flag) {};
-  // Node(void *data, char type)
-  //     : data(data), next(NULL), type(type), flag(FLAG_NONE) {};
-  Node(variant *data, Node *tail)
-      : data(std::shared_ptr<variant>(data)),
-        next(std::shared_ptr<Node>(tail)),
+  // Cell(shared_ptr<void> car, char type, char flag)
+  //     : car(car), cdr(NULL), type(type), flag(flag) {};
+  // Cell(void *car, char type)
+  //     : car(car), cdr(NULL), type(type), flag(FLAG_NONE) {};
+  Cell(variant car)
+      : car(std::make_shared<variant>(car)),
+        cdr(nullptr),
         type(TYPE_STRING),
         flag(FLAG_NONE) {}
-  Node(variant *data)
-      : data(std::shared_ptr<variant>(data)),
-        next(nullptr),
+  Cell(variant car, variant cdr)
+      : car(std::make_shared<variant>(car)),
+        cdr(std::make_shared<variant>(cdr)),
         type(TYPE_STRING),
         flag(FLAG_NONE) {}
-  Node(variant *data, std::shared_ptr<Node> tail)
-      : data(std::shared_ptr<variant>(data)),
-        next(tail),
-        type(TYPE_STRING),
-        flag(FLAG_NONE) {}
-  Node(std::shared_ptr<variant> data, Node *tail)
-      : data(data),
-        next(std::shared_ptr<Node>(tail)),
-        type(TYPE_STRING),
-        flag(FLAG_NONE) {}
-  Node(std::shared_ptr<variant> data)
-      : data(data), next(nullptr), type(TYPE_STRING), flag(FLAG_NONE) {}
-  Node(std::shared_ptr<variant> data, std::shared_ptr<Node> tail)
-      : data(data), next(tail), type(TYPE_STRING), flag(FLAG_NONE) {}
+  Cell(std::shared_ptr<variant> car)
+      : car(car), cdr(nullptr), type(TYPE_STRING), flag(FLAG_NONE) {}
+  Cell(std::shared_ptr<variant> car, std::shared_ptr<variant> cdr)
+      : car(car), cdr(cdr), type(TYPE_STRING), flag(FLAG_NONE) {}
 
-  // Node(const Node &other);
+  // Cell(const Cell &other);
 
   // Getters and setters
-  inline std::shared_ptr<Node> get_next() const { return this->next; }
-  inline std::shared_ptr<variant> get_data() const { return this->data; }
+  inline std::shared_ptr<variant> get_car() const { return this->car; }
+  inline std::shared_ptr<variant> get_cdr() const { return this->cdr; }
   inline void set_type(const char type) { this->type = type; }
   inline char get_type() const { return this->type; }
   inline void set_flag(const char flag) { this->flag = flag; }
@@ -83,24 +77,28 @@ class Node {
 };
 
 class List {
-  std::shared_ptr<Node> head;
-  static std::shared_ptr<Node> reverse(std::shared_ptr<Node> head);
+  std::shared_ptr<Cell> head;
+  static std::shared_ptr<Cell> reverse(std::shared_ptr<Cell> head);
 
  public:
-  // Static functions
-  static void cons(std::shared_ptr<Node> head, std::shared_ptr<Node> tail);
-  static std::shared_ptr<List> cons(std::shared_ptr<Node> head,
+  // Cons functions
+  static void cons(std::shared_ptr<Cell> head, std::shared_ptr<variant> tail);
+  static void cons(variant data, std::shared_ptr<Cell> tail);
+  static void cons(std::shared_ptr<variant> data, std::shared_ptr<Cell> tail);
+  static std::shared_ptr<List> cons(std::shared_ptr<Cell> head,
+                                    std::shared_ptr<List> tail);
+  static std::shared_ptr<List> cons(variant data, std::shared_ptr<List> tail);
+  static std::shared_ptr<List> cons(std::shared_ptr<variant> data,
                                     std::shared_ptr<List> tail);
   void reverse();
 
-  inline std::shared_ptr<Node> get_head() { return this->head; }
-  inline std::shared_ptr<Node> get_head() const { return this->head; }
+  inline std::shared_ptr<Cell> get_head() const { return this->head; }
 
   // Constructors
-  List(std::shared_ptr<Node> head) : head(head) {};
-  List(Node *head) : head(std::shared_ptr<Node>(head)) {};
+  List(std::shared_ptr<Cell> head) : head(head) {};
+  List(Cell *head) : head(std::shared_ptr<Cell>(head)) {};
 };
 
-std::ostream &operator<<(std::ostream &os, const Node &node);
+std::ostream &operator<<(std::ostream &os, const Cell &node);
 std::ostream &operator<<(std::ostream &os, const List &list);
 #endif  // LIST_HPP
