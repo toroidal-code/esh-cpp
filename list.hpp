@@ -31,11 +31,9 @@
 
 #define FLAG_NONE 0
 
-class List;
 class Cell;
-typedef boost::variant<std::string, bool, int,
-    boost::recursive_wrapper<Cell>, boost::recursive_wrapper<List>> variant;
-//typedef boost::any variant;
+typedef boost::variant<std::string, bool, int, boost::recursive_wrapper<Cell> >
+    variant;
 
 class Cell {
   friend class List;
@@ -78,27 +76,32 @@ class Cell {
 
 class List {
   std::shared_ptr<Cell> head;
-  static std::shared_ptr<Cell> reverse(std::shared_ptr<Cell> head);
+//  std::shared_ptr<Cell> last;
+  static std::shared_ptr<variant> reverse(std::shared_ptr<variant> head);
+  static std::shared_ptr<variant> get_last(std::shared_ptr<variant> ptr);
 
  public:
-  // Cons functions
-  static void cons(std::shared_ptr<Cell> head, std::shared_ptr<variant> tail);
-  static void cons(variant data, std::shared_ptr<Cell> tail);
-  static void cons(std::shared_ptr<variant> data, std::shared_ptr<Cell> tail);
-  static std::shared_ptr<List> cons(std::shared_ptr<Cell> head,
-                                    std::shared_ptr<List> tail);
-  static std::shared_ptr<List> cons(variant data, std::shared_ptr<List> tail);
-  static std::shared_ptr<List> cons(std::shared_ptr<variant> data,
-                                    std::shared_ptr<List> tail);
+  //  // Cons functions
+  //  static void cons(std::shared_ptr<Cell> head, std::shared_ptr<variant>
+  // tail);
+  //  static void cons(variant data, std::shared_ptr<Cell> tail);
+  //  static void cons(std::shared_ptr<variant> data, std::shared_ptr<Cell>
+  // tail);
+  //  static std::shared_ptr<List> cons(std::shared_ptr<Cell> head,
+  //                                    std::shared_ptr<List> tail);
+  //  static std::shared_ptr<List> cons(variant data, std::shared_ptr<List>
+  // tail);
+  //  static std::shared_ptr<List> cons(std::shared_ptr<variant> data,
+  //                                    std::shared_ptr<List> tail);
   void reverse();
-
   inline std::shared_ptr<Cell> get_head() const { return this->head; }
+ // inline std::shared_ptr<Cell> get_last() const { return this->last; }
 
   // Constructors
-  List(std::shared_ptr<Cell> head) : head(head) {};
+  List(std::shared_ptr<Cell> head) : head(head) { };
   List(Cell *head) : head(std::shared_ptr<Cell>(head)) {};
 };
 
 std::ostream &operator<<(std::ostream &os, const Cell &node);
-std::ostream &operator<<(std::ostream &os, const List &list);
+// std::ostream &operator<<(std::ostream &os, const List &list);
 #endif  // LIST_HPP
